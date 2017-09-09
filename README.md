@@ -1,7 +1,10 @@
 # Assignment 1: Github project data
 ## Instructions:
 
-Develop a service that will consume a given GitHub project URI and will return the associated user account/organisation, an indication of a programming language(s) used, and the account name of the top committer, that is, the contributor with the largest number of commits to the project.
+Develop a service that will consume a given GitHub project URI and will return 
+the associated user account/organisation, an indication of a programming
+language(s) used, and the account name of the top committer, that is, the 
+contributor with the largest number of commits to the project.
 
 ## Service Specification:
 
@@ -33,7 +36,7 @@ http://localhost:8080/projectinfo/v1/github.com/apache/kafka
     "committer": {
         "type": "string"
     },
-
+    
     "commits": {
         "type": "number"
     },
