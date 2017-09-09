@@ -1,33 +1,34 @@
 package main
 
 import (
-    "encoding/json"
-	"net/http"
+    "net/http"
     "log"     
-    "time")
+    "github.com/gorilla/mux"
+    "fmt"
+    "./githubapi"
+)
 
 //
 // TimeHandler
-// 
-type TimeHandler struct {
-  format string
-}
-
-func (th *TimeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-  tm := time.Now().Format(th.format)
-  w.Write([]byte("The time is: " + tm))
-}
-
+//
 
 
 func main() {
+    router := mux.NewRouter().StrictSlash(true)
 
-
-	mux := http.NewServeMux()
-    th :=  &TimeHandler{ format: time.RFC1123 }
-
-    mux.Handle("/time", th)
-    log.Println("Listening on port 3000...")
-    http.ListenAndServe(":3000", mux)
+    router.HandleFunc("/projectinfo/v1/{base}/{user}/{repo}", GithubProjectinfo)
+    log.Fatal(http.ListenAndServe(":8080", router))
 }
 
+func GithubProjectinfo(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintln(w, "Github - projectinfo")
+
+    vars := mux.Vars(r)
+    fmt.Fprintln(w, "Url:  " + r.URL.Path)
+    fmt.Fprintln(w, "Base: " + vars["base"])
+    fmt.Fprintln(w, "User: " + vars["user"])
+    fmt.Fprintln(w, "Repo: " + vars["repo"])
+
+    fmt.Fprintln(w, "----------------- ")
+    fmt.Fprintln(w, "Projectinfo: " + githubapi.GetProjectinfo(vars["user"], vars["repo"]))
+}
