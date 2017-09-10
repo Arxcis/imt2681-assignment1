@@ -163,5 +163,5 @@ func main() {
 
     router.HandleFunc("/projectinfo/v1/{base}/{user}/{repo}", GithubProjectinfo)
     router.HandleFunc("/", DefaultHandler)
-    log.Fatal(http.ListenAndServe(os.Getenv("PORT"), router))
+    log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), router))
 }
