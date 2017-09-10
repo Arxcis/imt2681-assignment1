@@ -1,1 +1,1 @@
-web: im2681-assignment1
+web: ./main
