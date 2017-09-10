@@ -1,12 +1,9 @@
 FROM alpine:latest
 
-MAINTAINER Edward Muller <edward@heroku.com>
+MAINTAINER Jonas Solsvik <jonas.solsvik@gmail.com>
 
 WORKDIR "/opt"
 
-ADD .docker_build/go-getting-started /opt/bin/go-getting-started
-ADD ./templates /opt/templates
-ADD ./static /opt/static
+ADD .docker_build/imt2681-assignment1 /opt/bin/imt2681-assignment1
 
-CMD ["/opt/bin/go-getting-started"]
-
+CMD ["/opt/bin/imt2681-assignment1"]
