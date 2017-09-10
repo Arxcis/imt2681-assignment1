@@ -1,1 +1,1 @@
-web: go run main.go
+web: im2681-assignment1
