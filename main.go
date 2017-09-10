@@ -133,7 +133,7 @@ func main() {
 
     router.HandleFunc("/projectinfo/v1/{base}/{user}/{repo}", GithubProjectinfo)
     router.HandleFunc("/", DefaultHandler)
-    log.Fatal(http.ListenAndServe(":8080", router))
+    log.Fatal(http.ListenAndServe(":5000", router))
 }
 
 func DefaultHandler(w http.ResponseWriter, r *http.Request) {
