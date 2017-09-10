@@ -8,6 +8,7 @@ import (
     "io/ioutil"
     "encoding/json"
     "sync" 
+    "os"
 )
 const BASE = "https://api.github.com"
 
@@ -125,16 +126,6 @@ func getProjectinfo(user string, repo string) string {
     return string(data)
 }
 
-//
-// MAIN
-//
-func main() {
-    router := mux.NewRouter().StrictSlash(true)
-
-    router.HandleFunc("/projectinfo/v1/{base}/{user}/{repo}", GithubProjectinfo)
-    router.HandleFunc("/", DefaultHandler)
-    log.Fatal(http.ListenAndServe(":5000", router))
-}
 
 func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -162,4 +153,15 @@ func GithubProjectinfo(w http.ResponseWriter, r *http.Request) {
 
     fmt.Fprintln(w, "----------------- ")
     fmt.Fprintln(w, "Projectinfo: " + getProjectinfo(vars["user"], vars["repo"]))
+}
+
+//
+// MAIN
+//
+func main() {
+    router := mux.NewRouter().StrictSlash(true)
+
+    router.HandleFunc("/projectinfo/v1/{base}/{user}/{repo}", GithubProjectinfo)
+    router.HandleFunc("/", DefaultHandler)
+    log.Fatal(http.ListenAndServe(os.Getenv("PORT"), router))
 }
