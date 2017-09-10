@@ -132,7 +132,23 @@ func main() {
     router := mux.NewRouter().StrictSlash(true)
 
     router.HandleFunc("/projectinfo/v1/{base}/{user}/{repo}", GithubProjectinfo)
+    router.HandleFunc("/", DefaultHandler)
     log.Fatal(http.ListenAndServe(":8080", router))
+}
+
+func DefaultHandler(w http.ResponseWriter, r *http.Request) {
+
+    defaultBase := "projectinfo/v1/github.com/"
+    defaultUser := "FylkesmannenIKT"
+    defaultRepo := "OrdBase"
+
+    fmt.Fprintln(w, "Url:  " + r.URL.Path)
+    fmt.Fprintln(w, "Base: " + defaultBase)
+    fmt.Fprintln(w, "User: " + defaultUser)
+    fmt.Fprintln(w, "Repo: " + defaultRepo)
+
+    fmt.Fprintln(w, "----------------- ")
+    fmt.Fprintln(w, "Projectinfo: " + getProjectinfo(defaultUser, defaultRepo))
 }
 
 func GithubProjectinfo(w http.ResponseWriter, r *http.Request) {
