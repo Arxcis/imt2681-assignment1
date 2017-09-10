@@ -1,1 +1,1 @@
-web: imt2681-assignment1
+web: go run main.go

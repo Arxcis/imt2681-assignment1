@@ -39,12 +39,12 @@ type ServiceResponse struct {
 func getRequestBody(url string) []byte {
     resp, err := http.Get(url);
     if err != nil {
-        panic(err)
+        log.Println(err)
     }
 
     body, err := ioutil.ReadAll(resp.Body)
     if err != nil {
-        panic(err)
+        log.Println(err)
     }
     resp.Body.Close()
     return body
@@ -71,7 +71,7 @@ func getProjectinfo(user string, repo string) string {
         body := getRequestBody(CURRENT_REPO_URL)    
         if err := json.Unmarshal(body, &githubRepo); err != nil {
             log.Println(string(body))
-            panic(err)
+            log.Println(err)
         }
         serviceResponse.Repository = githubRepo.Name // @TODO - This should be on the form github.com/user/reponame
         serviceResponse.Owner      = githubRepo.Owner.Name
@@ -85,7 +85,7 @@ func getProjectinfo(user string, repo string) string {
         body := getRequestBody(CURRENT_REPO_LANGUAGES_URL)
         if err := json.Unmarshal(body, &githubRepo.Languages); err != nil {
             log.Println(string(body))
-            panic(err)
+            log.Println(err)
         }   
 
         for k,_ := range githubRepo.Languages {
@@ -100,7 +100,7 @@ func getProjectinfo(user string, repo string) string {
         body := getRequestBody(CURRENT_REPO_CONTRIBUTORS_URL)
         if err := json.Unmarshal(body, &githubRepo.Contributors); err != nil {
             log.Println(string(body))
-            panic(err)
+            log.Println(err)
         }
 
         // 4. Find the most valuable contributor
@@ -119,7 +119,7 @@ func getProjectinfo(user string, repo string) string {
     // 5. Return to user
     data, err := json.Marshal(serviceResponse)
     if err != nil {
-        panic(err)
+        log.Println(err)
     }
     log.Println(string(data))
     return string(data)
