@@ -10,3 +10,7 @@
 [9] Go routines waitgroup - https://nathanleclaire.com/blog/2014/02/15/how-to-wait-for-all-goroutines-to-finish-executing-before-continuing/
 [10] RestfullAPI Goriall Mux server example - https://thenewstack.io/make-a-restful-json-api-go/
 [11] os.Getenv - https://gobyexample.com/environment-variables
+
+[12] https://stackoverflow.com/questions/17156371/how-to-get-json-response-in-golang
+[13] target interface{} as parameterhttps://stackoverflow.com/questions/20314604/go-syntax-and-interface-as-parameter-to-function
+[14] repos/contributors - https://developer.github.com/v3/repos/#list-contributors
