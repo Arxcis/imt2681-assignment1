@@ -14,3 +14,5 @@
 [12] https://stackoverflow.com/questions/17156371/how-to-get-json-response-in-golang
 [13] target interface{} as parameterhttps://stackoverflow.com/questions/20314604/go-syntax-and-interface-as-parameter-to-function
 [14] repos/contributors - https://developer.github.com/v3/repos/#list-contributors
+[15] channels - https://gobyexample.com/channels
+[16] channel syncronization - https://gobyexample.com/channel-synchronization
