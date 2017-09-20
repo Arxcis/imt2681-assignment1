@@ -6,10 +6,53 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"sync"
 
 	"github.com/gorilla/mux"
 )
+
+// UnmarshalJSONHttp ...
+func UnmarshalJSONHttp(target interface{}, url string, wg *sync.WaitGroup, errorChannel chan error) {
+
+	log.Println("Requesting URL: " + url)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		errorChannel <- err
+		wg.Done()
+		return
+	}
+	defer resp.Body.Close() // Do I even have to close?
+
+	err = json.NewDecoder(resp.Body).Decode(target)
+	if err != nil {
+		errorChannel <- err
+	}
+	wg.Done()
+	return
+}
+
+// UnmarshalJSONFile ...
+func UnmarshalJSONFile(target interface{}, filepath string, wg *sync.WaitGroup, errorChannel chan error) {
+
+	log.Println("Reading FILE: " + filepath)
+
+	file, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		errorChannel <- err
+		wg.Done()
+		return
+	}
+
+	err = json.Unmarshal(file, target)
+	if err != nil {
+		errorChannel <- err
+	}
+
+	wg.Done()
+	return
+}
 
 // ParseGitRepository ...
 func ParseGitRepository(user string, repo string) (interface{}, error) {
@@ -33,57 +76,25 @@ func ParseGitRepository(user string, repo string) (interface{}, error) {
 		wg := &sync.WaitGroup{}
 		wg.Add(3)
 
-		//UnmarshalJSON := func(target interface{}, url string, wg *sync.WaitGroup, errorChannel chan error) {
+		devenv, _ := strconv.ParseBool(os.Getenv("DEVENV"))
+		if devenv {
+			repoFile := "json/repo.json"
+			languagesFile := "json/languages.json"
+			contributorsFile := "json/contributors.json"
 
-		//	resp, err := http.Get(url)
-		//	if err != nil {
-		//		errorChannel <- err
-		//		wg.Done()
-		//		return
-		//	}
-		//	defer resp.Body.Close() // Do I even have to close?
+			go UnmarshalJSONFile(githubRepo, repoFile, wg, errorChannel)
+			go UnmarshalJSONFile(&(githubRepo.Languages), languagesFile, wg, errorChannel)
+			go UnmarshalJSONFile(&(githubRepo.Contributors), contributorsFile, wg, errorChannel)
 
-		//	err = json.NewDecoder(resp.Body).Decode(target)
-		//	if err != nil {
-		//		errorChannel <- err
-		//	}
-		//	wg.Done()
-		//	return
-		//}
-		//repoURL := "https://api.github.com/repos/" + user + "/" + repo
-		//languagesURL := repoURL + "/languages"
-		//contributorsURL := repoURL + "/contributors"
+		} else {
+			repoURL := "https://api.github.com/repos/" + user + "/" + repo
+			languagesURL := repoURL + "/languages"
+			contributorsURL := repoURL + "/contributors"
 
-		//go UnmarshalJSON(githubRepo, repoURL, wg, errorChannel)
-		//go UnmarshalJSON(&(githubRepo.Languages), languagesURL, wg, errorChannel)
-		//go UnmarshalJSON(&(githubRepo.Contributors), contributorsURL, wg, errorChannel)
-		// UnmarshalJSONDev - Only mocks local files, instead of the github API
-
-		UnmarshalJSONDev := func(target interface{}, filepath string, wg *sync.WaitGroup, errorChannel chan error) {
-			file, err := ioutil.ReadFile(filepath)
-			if err != nil {
-				errorChannel <- err
-				wg.Done()
-				return
-			}
-
-			err = json.Unmarshal(file, target)
-			if err != nil {
-				errorChannel <- err
-			}
-
-			wg.Done()
-			return
+			go UnmarshalJSONHttp(githubRepo, repoURL, wg, errorChannel)
+			go UnmarshalJSONHttp(&(githubRepo.Languages), languagesURL, wg, errorChannel)
+			go UnmarshalJSONHttp(&(githubRepo.Contributors), contributorsURL, wg, errorChannel)
 		}
-
-		repoFile := "json/repo.json"
-		languagesFile := "json/languages.json"
-		contributorsFile := "json/contributors.json"
-
-		go UnmarshalJSONDev(githubRepo, repoFile, wg, errorChannel)
-		go UnmarshalJSONDev(&(githubRepo.Languages), languagesFile, wg, errorChannel)
-		go UnmarshalJSONDev(&(githubRepo.Contributors), contributorsFile, wg, errorChannel)
-
 		wg.Wait()
 
 		close(errorChannel)
@@ -140,5 +151,5 @@ func main() {
 	router.HandleFunc("/projectinfo/v1/github.com/", BadRequestHandler)
 	router.HandleFunc("/projectinfo/v1/github.com/{user}", BadRequestHandler)
 	router.HandleFunc("/projectinfo/v1/github.com/{user}/{repo}", GitRepositoryHandler)
-	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), router))
+	log.Println(http.ListenAndServe(":"+os.Getenv("PORT"), router))
 }
