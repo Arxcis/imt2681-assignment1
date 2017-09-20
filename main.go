@@ -12,8 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// UnmarshalJSONHttp ...
-func UnmarshalJSONHttp(target interface{}, url string, wg *sync.WaitGroup, errorChannel chan error) {
+func unmarshalJSONHttp(target interface{}, url string, wg *sync.WaitGroup, errorChannel chan error) {
 
 	log.Println("Requesting URL: " + url)
 
@@ -33,8 +32,7 @@ func UnmarshalJSONHttp(target interface{}, url string, wg *sync.WaitGroup, error
 	return
 }
 
-// UnmarshalJSONFile ...
-func UnmarshalJSONFile(target interface{}, filepath string, wg *sync.WaitGroup, errorChannel chan error) {
+func unmarshalJSONFile(target interface{}, filepath string, wg *sync.WaitGroup, errorChannel chan error) {
 
 	log.Println("Reading FILE: " + filepath)
 
@@ -54,8 +52,7 @@ func UnmarshalJSONFile(target interface{}, filepath string, wg *sync.WaitGroup, 
 	return
 }
 
-// ParseGitRepository ...
-func ParseGitRepository(user string, repo string) (interface{}, error) {
+func parseGitRepository(user string, repo string) (interface{}, error) {
 
 	type GitRepositoryIn struct {
 		Name  string `json:"name"`
@@ -82,18 +79,18 @@ func ParseGitRepository(user string, repo string) (interface{}, error) {
 			languagesFile := "json/languages.json"
 			contributorsFile := "json/contributors.json"
 
-			go UnmarshalJSONFile(githubRepo, repoFile, wg, errorChannel)
-			go UnmarshalJSONFile(&(githubRepo.Languages), languagesFile, wg, errorChannel)
-			go UnmarshalJSONFile(&(githubRepo.Contributors), contributorsFile, wg, errorChannel)
+			go unmarshalJSONFile(githubRepo, repoFile, wg, errorChannel)
+			go unmarshalJSONFile(&(githubRepo.Languages), languagesFile, wg, errorChannel)
+			go unmarshalJSONFile(&(githubRepo.Contributors), contributorsFile, wg, errorChannel)
 
 		} else {
 			repoURL := "https://api.github.com/repos/" + user + "/" + repo
 			languagesURL := repoURL + "/languages"
 			contributorsURL := repoURL + "/contributors"
 
-			go UnmarshalJSONHttp(githubRepo, repoURL, wg, errorChannel)
-			go UnmarshalJSONHttp(&(githubRepo.Languages), languagesURL, wg, errorChannel)
-			go UnmarshalJSONHttp(&(githubRepo.Contributors), contributorsURL, wg, errorChannel)
+			go unmarshalJSONHttp(githubRepo, repoURL, wg, errorChannel)
+			go unmarshalJSONHttp(&(githubRepo.Languages), languagesURL, wg, errorChannel)
+			go unmarshalJSONHttp(&(githubRepo.Contributors), contributorsURL, wg, errorChannel)
 		}
 		wg.Wait()
 
@@ -127,16 +124,14 @@ func ParseGitRepository(user string, repo string) (interface{}, error) {
 	}, nil
 }
 
-// BadRequestHandler ...
-func BadRequestHandler(w http.ResponseWriter, r *http.Request) {
+func badRequestHandler(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 }
 
-// GitRepositoryHandler ...
-func GitRepositoryHandler(w http.ResponseWriter, r *http.Request) {
+func gitRepositoryHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	vars := mux.Vars(r)
-	parsedRepository, err := ParseGitRepository(vars["user"], vars["repo"])
+	parsedRepository, err := parseGitRepository(vars["user"], vars["repo"])
 
 	if err != nil {
 		log.Println(err)
@@ -148,8 +143,8 @@ func GitRepositoryHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/projectinfo/v1/github.com/", BadRequestHandler)
-	router.HandleFunc("/projectinfo/v1/github.com/{user}", BadRequestHandler)
-	router.HandleFunc("/projectinfo/v1/github.com/{user}/{repo}", GitRepositoryHandler)
+	router.HandleFunc("/projectinfo/v1/github.com/", badRequestHandler)
+	router.HandleFunc("/projectinfo/v1/github.com/{user}", badRequestHandler)
+	router.HandleFunc("/projectinfo/v1/github.com/{user}/{repo}", gitRepositoryHandler)
 	log.Println(http.ListenAndServe(":"+os.Getenv("PORT"), router))
 }
