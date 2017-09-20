@@ -13,7 +13,7 @@
 			"path": "github.com/gorilla/mux",
 			"revision": "24fca303ac6da784b9e8269f724ddeb0b2eea5e7",
 			"revisionTime": "2017-09-05T17:10:44Z"
-		},
+		}
 	],
 	"rootPath": "github.com/Arxcis/imt2681-assignment1",
 	"heroku": {
