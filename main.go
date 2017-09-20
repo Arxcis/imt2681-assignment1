@@ -53,20 +53,28 @@ func unmarshalJSONFile(target interface{}, filepath string, wg *sync.WaitGroup, 
 	return
 }
 
+type GitRepositoryOut struct {
+	Repository string   `json:"repository"` // e.g. Ordbase
+	Owner      string   `json:"owner"`      // e.g. FylkesmannenIKT
+	Committer  string   `json:"committer"`  // e.g. Arxcis
+	Commits    uint     `json:"commits"`    // e.g. 115
+	Languages  []string `json:"languages"`  // e.g. [shell, java, scala, ...]
+}
+
 // ParseGitRepository ....
-func ParseGitRepository(user string, repo string, devenv bool) (interface{}, error) {
+func ParseGitRepository(user string, repo string, devenv bool) (GitRepositoryOut, error) {
 
 	// 1. Inputvalidation
 	{
 		regexGithubName, err := regexp.Compile("^([a-zA-Z](-?[a-zA-Z])?)+$")
 		matched := regexGithubName.MatchString(user)
 		if matched != true {
-			return nil, err
+			return GitRepositoryOut{}, err
 		}
 
 		matched = regexGithubName.MatchString(repo)
 		if matched != true {
-			return nil, err
+			return GitRepositoryOut{}, err
 		}
 	}
 
@@ -112,18 +120,11 @@ func ParseGitRepository(user string, repo string, devenv bool) (interface{}, err
 
 		close(errorChannel)
 		for err := range errorChannel {
-			return nil, err
+			return GitRepositoryOut{}, err
 		}
 	}
 
 	// 3. Convert API-data IN to API-data OUT format
-	type GitRepositoryOut struct {
-		Repository string   `json:"repository"` // e.g. Ordbase
-		Owner      string   `json:"owner"`      // e.g. FylkesmannenIKT
-		Committer  string   `json:"committer"`  // e.g. Arxcis
-		Commits    uint     `json:"commits"`    // e.g. 115
-		Languages  []string `json:"languages"`  // e.g. [shell, java, scala, ...]
-	}
 
 	return GitRepositoryOut{
 		Repository: githubRepo.Name,
