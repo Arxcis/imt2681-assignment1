@@ -14,12 +14,6 @@
 			"revision": "24fca303ac6da784b9e8269f724ddeb0b2eea5e7",
 			"revisionTime": "2017-09-05T17:10:44Z"
 		},
-		{
-			"checksumSHA1": "OZpv1QDSDG23bzSk/7auPQRB2Qg=",
-			"path": "github.com/russross/blackfriday",
-			"revision": "4048872b16cc0fc2c5fd9eacf0ed2c2fedaa0c8c",
-			"revisionTime": "2017-07-28T17:53:26Z"
-		}
 	],
 	"rootPath": "github.com/Arxcis/imt2681-assignment1",
 	"heroku": {
