@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"sync"
 
@@ -52,7 +53,22 @@ func unmarshalJSONFile(target interface{}, filepath string, wg *sync.WaitGroup, 
 	return
 }
 
-func parseGitRepository(user string, repo string) (interface{}, error) {
+// ParseGitRepository ....
+func ParseGitRepository(user string, repo string, devenv bool) (interface{}, error) {
+
+	// 1. Inputvalidation
+	{
+		regexGithubName, err := regexp.Compile("^([a-zA-Z](-?[a-zA-Z])?)+$")
+		matched := regexGithubName.MatchString(user)
+		if matched != true {
+			return nil, err
+		}
+
+		matched = regexGithubName.MatchString(repo)
+		if matched != true {
+			return nil, err
+		}
+	}
 
 	type GitRepositoryIn struct {
 		Name  string `json:"name"`
@@ -67,13 +83,13 @@ func parseGitRepository(user string, repo string) (interface{}, error) {
 		Languages map[string]interface{}
 	}
 
+	// 2. Get API data
 	githubRepo := &GitRepositoryIn{}
 	{
 		errorChannel := make(chan error)
 		wg := &sync.WaitGroup{}
 		wg.Add(3)
 
-		devenv, _ := strconv.ParseBool(os.Getenv("DEVENV"))
 		if devenv {
 			repoFile := "json/repo.json"
 			languagesFile := "json/languages.json"
@@ -100,6 +116,7 @@ func parseGitRepository(user string, repo string) (interface{}, error) {
 		}
 	}
 
+	// 3. Convert API-data IN to API-data OUT format
 	type GitRepositoryOut struct {
 		Repository string   `json:"repository"` // e.g. Ordbase
 		Owner      string   `json:"owner"`      // e.g. FylkesmannenIKT
@@ -131,7 +148,9 @@ func badRequestHandler(w http.ResponseWriter, r *http.Request) {
 func gitRepositoryHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	vars := mux.Vars(r)
-	parsedRepository, err := parseGitRepository(vars["user"], vars["repo"])
+
+	devenv, _ := strconv.ParseBool(os.Getenv("DEVENV"))
+	parsedRepository, err := ParseGitRepository(vars["user"], vars["repo"], devenv)
 
 	if err != nil {
 		log.Println(err)
