@@ -53,6 +53,21 @@ func unmarshalJSONFile(target interface{}, filepath string, wg *sync.WaitGroup, 
 	return
 }
 
+// GitRepositoryIn ...
+type GitRepositoryIn struct {
+	Name  string `json:"name"`
+	Owner struct {
+		Name string `json:"login"`
+	} `json:"owner"`
+
+	Contributors []struct {
+		Name          string `json:"login"`
+		Contributions uint   `json:"contributions"`
+	}
+	Languages map[string]interface{}
+}
+
+// GitRepositoryOut ...
 type GitRepositoryOut struct {
 	Repository string   `json:"repository"` // e.g. Ordbase
 	Owner      string   `json:"owner"`      // e.g. FylkesmannenIKT
@@ -78,21 +93,8 @@ func ParseGitRepository(user string, repo string, devenv bool) (GitRepositoryOut
 		}
 	}
 
-	type GitRepositoryIn struct {
-		Name  string `json:"name"`
-		Owner struct {
-			Name string `json:"login"`
-		} `json:"owner"`
-
-		Contributors []struct {
-			Name          string `json:"login"`
-			Contributions uint   `json:"contributions"`
-		}
-		Languages map[string]interface{}
-	}
-
 	// 2. Get API data
-	githubRepo := &GitRepositoryIn{}
+	githubRepo := GitRepositoryIn{}
 	{
 		errorChannel := make(chan error)
 		wg := &sync.WaitGroup{}
@@ -103,7 +105,7 @@ func ParseGitRepository(user string, repo string, devenv bool) (GitRepositoryOut
 			languagesFile := "json/languages.json"
 			contributorsFile := "json/contributors.json"
 
-			go unmarshalJSONFile(githubRepo, repoFile, wg, errorChannel)
+			go unmarshalJSONFile(&(githubRepo), repoFile, wg, errorChannel)
 			go unmarshalJSONFile(&(githubRepo.Languages), languagesFile, wg, errorChannel)
 			go unmarshalJSONFile(&(githubRepo.Contributors), contributorsFile, wg, errorChannel)
 
@@ -112,7 +114,7 @@ func ParseGitRepository(user string, repo string, devenv bool) (GitRepositoryOut
 			languagesURL := repoURL + "/languages"
 			contributorsURL := repoURL + "/contributors"
 
-			go unmarshalJSONHttp(githubRepo, repoURL, wg, errorChannel)
+			go unmarshalJSONHttp(&(githubRepo), repoURL, wg, errorChannel)
 			go unmarshalJSONHttp(&(githubRepo.Languages), languagesURL, wg, errorChannel)
 			go unmarshalJSONHttp(&(githubRepo.Contributors), contributorsURL, wg, errorChannel)
 		}
